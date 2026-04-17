@@ -1,17 +1,22 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import apiClient from './client';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+let Notifications;
+let Device;
+
+try {
+  Notifications = require('expo-notifications');
+  Device = require('expo-device');
+} catch (e) {
+  console.log('expo-notifications not available:', e.message);
+}
 
 export async function registerForPushNotificationsAsync() {
+  if (!Notifications || !Device) {
+    console.log('Push notifications require a development build');
+    return null;
+  }
+
   let token;
 
   if (!Device.isDevice) {
@@ -19,35 +24,43 @@ export async function registerForPushNotificationsAsync() {
     return null;
   }
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus !== 'granted') {
-    console.log('Push notification permission not granted');
-    return null;
-  }
-
   try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      console.log('Push notification permission not granted');
+      return null;
+    }
+
     const pushTokenData = await Notifications.getExpoPushTokenAsync();
     token = pushTokenData.data;
     console.log('Expo Push Token:', token);
-  } catch (e) {
-    console.log('Error getting push token:', e);
-    return null;
-  }
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  } catch (e) {
+    console.log('Error getting push token:', e.message);
+    return null;
   }
 
   return token;
@@ -65,9 +78,11 @@ export async function sendPushTokenToBackend(token) {
 }
 
 export function addNotificationReceivedListener(callback) {
+  if (!Notifications) return { remove: () => {} };
   return Notifications.addNotificationReceivedListener(callback);
 }
 
 export function addNotificationResponseReceivedListener(callback) {
+  if (!Notifications) return { remove: () => {} };
   return Notifications.addNotificationResponseReceivedListener(callback);
 }

@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import apiClient from '../api/client';
+import SafeVideo from '../components/SafeVideo';
 
 const { height, width } = Dimensions.get('window');
 
@@ -47,11 +47,11 @@ const ReelItem = React.memo(({ item, isVisible }) => {
   return (
     <View style={styles.container}>
       {item.video_url ? (
-        <Video
+        <SafeVideo
           ref={videoRef}
           style={styles.video}
           source={{ uri: item.video_url }}
-          resizeMode={ResizeMode.COVER}
+          resizeMode="cover"
           isLooping
           onPlaybackStatusUpdate={(s) => setStatus(() => s)}
         />

@@ -15,7 +15,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
-import { Video, ResizeMode } from 'expo-av';
+import SafeVideo from '../components/SafeVideo';
 import apiClient from '../api/client';
 
 const CreatePostScreen = ({ navigation }) => {
@@ -130,10 +130,10 @@ const CreatePostScreen = ({ navigation }) => {
 
       {video ? (
         <View style={styles.previewWrapper}>
-          <Video
+          <SafeVideo
             source={{ uri: video.uri }}
             style={styles.previewVideo}
-            resizeMode={ResizeMode.COVER}
+            resizeMode="cover"
             useNativeControls
           />
           <TouchableOpacity style={styles.removeBtn} onPress={() => { setVideo(null); setIsReel(false); }}>

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import User, Follow
+from .models import User, Follow, DeviceToken
 from apps.notifications.services import send_push_notification
 from .serializers import UserSerializer, UserRegisterSerializer, FollowSerializer, UserUpdateSerializer, DeviceTokenSerializer
 
