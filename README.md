@@ -54,6 +54,12 @@ If using Wi-Fi instead:
 3. Add the IP to `backend/.env` in `DJANGO_ALLOWED_HOSTS` and `CORS_EXTRA_ORIGINS`
 4. Ensure phone and Mac are on the **same Wi-Fi**
 
+
+
+### login
+  -d '{"email":"test@example.com","password":"testpass123"}'
+
+
 ## Docs
 
 - [INSTAGRAM_CLONE_GUIDE.md](./INSTAGRAM_CLONE_GUIDE.md) — Full architecture, packages, and junior-dev maintenance guide.

@@ -78,8 +78,12 @@ const PostCard = React.memo(({ post, navigation, onUpdate }) => {
       <TapGestureHandler onHandlerStateChange={onDoubleTap} numberOfTaps={2}>
         <View>
           {post.video_url ? (
-            <View>
-              <Image source={{ uri: post.images?.[0]?.image || '' }} style={styles.postImage} resizeMode="cover" />
+            <View style={styles.postImage}>
+              {post.images?.[0]?.image ? (
+                <Image source={{ uri: post.images[0].image }} style={styles.postImage} resizeMode="cover" />
+              ) : (
+                <View style={[styles.postImage, { backgroundColor: '#000' }]} />
+              )}
               <View style={styles.videoIndicator}>
                 <Ionicons name="play-circle" size={48} color="#fff" />
               </View>

@@ -79,9 +79,13 @@ const UserProfileScreen = ({ route, navigation }) => {
 
   const renderPostGridItem = ({ item }) => (
     <View style={styles.gridItem}>
-      {item.images?.length > 0 && (
+      {item.images?.length > 0 ? (
         <Image source={{ uri: item.images[0].image }} style={styles.gridImage} />
-      )}
+      ) : item.video_url ? (
+        <View style={[styles.gridImage, { backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }]}>
+          <Ionicons name="play-circle" size={24} color="#fff" />
+        </View>
+      ) : null}
     </View>
   );
 

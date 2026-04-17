@@ -30,6 +30,10 @@ const HashtagResultScreen = ({ route, navigation }) => {
     >
       {item.images?.length > 0 ? (
         <Image source={{ uri: item.images[0].image }} style={styles.gridImage} />
+      ) : item.video_url ? (
+        <View style={[styles.gridImage, { backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }]}>
+          <Ionicons name="play-circle" size={24} color="#fff" />
+        </View>
       ) : (
         <View style={styles.gridImagePlaceholder}>
           <Text style={styles.gridImageLabel}>#{tag}</Text>
