@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -31,15 +32,22 @@ const FollowersListScreen = ({ route, navigation }) => {
     fetchData();
   }, [fetchData]);
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.row}
-      onPress={() => navigation.navigate('UserProfile', { username: item.username })}
-    >
-      <View style={styles.avatar} />
-      <Text style={styles.username}>{item.username}</Text>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    const avatarUrl = item.profile?.profile_image;
+    return (
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => navigation.navigate('UserProfile', { username: item.username })}
+      >
+        {avatarUrl ? (
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder} />
+        )}
+        <Text style={styles.username}>{item.username}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -83,7 +91,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#ddd', marginRight: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, marginRight: 12 },
+  avatarPlaceholder: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#ddd', marginRight: 12 },
   username: { fontWeight: 'bold', fontSize: 14 },
   empty: { textAlign: 'center', color: '#666', marginTop: 30 },
 });

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -45,12 +46,17 @@ const MessagesListScreen = ({ navigation }) => {
   const renderItem = ({ item }) => {
     const partner = item.partner;
     const isMe = item.sender.id === user.id;
+    const avatarUrl = partner?.profile?.profile_image;
     return (
       <TouchableOpacity
         style={styles.row}
         onPress={() => navigation.navigate('Chat', { userId: partner.id, username: partner.username })}
       >
-        <View style={styles.avatar} />
+        {avatarUrl ? (
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder} />
+        )}
         <View style={styles.body}>
           <Text style={styles.username}>{partner.username}</Text>
           <Text style={[styles.preview, !item.is_read && !isMe && styles.unread]} numberOfLines={1}>
@@ -106,7 +112,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#ddd', marginRight: 12 },
+  avatar: { width: 48, height: 48, borderRadius: 24, marginRight: 12 },
+  avatarPlaceholder: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#ddd', marginRight: 12 },
   body: { flex: 1 },
   username: { fontWeight: 'bold', fontSize: 15, marginBottom: 2 },
   preview: { color: '#666', fontSize: 14 },

@@ -1,9 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// IMPORTANT: Replace with your Mac's local IP address
-// Find it with: ipconfig getifaddr en0
-const API_URL = 'http://10.34.83.169:8000/api';
+import { API_URL } from '../config/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,

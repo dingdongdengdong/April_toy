@@ -1,6 +1,8 @@
 import os
 from django.conf import settings
 
+from .models import Notification
+
 try:
     import firebase_admin
     from firebase_admin import messaging, credentials
@@ -22,7 +24,18 @@ def _init_fcm():
         _fcm_initialized = True
 
 
-def send_push_notification(user, title, body, data=None):
+def send_push_notification(user, title, body, data=None, notification_type=None, sender=None, post=None):
+    # Create in-app notification record
+    if notification_type and sender and user != sender:
+        Notification.objects.create(
+            recipient=user,
+            sender=sender,
+            notification_type=notification_type,
+            post=post,
+            text=title,
+        )
+
+    # Send FCM push notification
     _init_fcm()
     if not FCM_AVAILABLE or not _fcm_initialized:
         return

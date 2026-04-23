@@ -23,6 +23,7 @@ import FollowingListScreen from '../screens/FollowingListScreen';
 import SavedPostsScreen from '../screens/SavedPostsScreen';
 import CreateStoryScreen from '../screens/CreateStoryScreen';
 import StoryViewerScreen from '../screens/StoryViewerScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -44,6 +45,7 @@ const HomeStack = () => (
     <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
     <Stack.Screen name="MessagesList" component={MessagesListScreen} />
     <Stack.Screen name="Chat" component={ChatScreen} />
+    <Stack.Screen name="Notifications" component={NotificationsScreen} />
   </Stack.Navigator>
 );
 
@@ -84,6 +86,8 @@ const MainTabNavigator = () => (
           iconName = focused ? 'videocam' : 'videocam-outline';
         } else if (route.name === 'Create') {
           iconName = focused ? 'add-circle' : 'add-circle-outline';
+        } else if (route.name === 'Notifications') {
+          iconName = focused ? 'heart' : 'heart-outline';
         } else if (route.name === 'Profile') {
           iconName = focused ? 'person' : 'person-outline';
         }
@@ -97,6 +101,7 @@ const MainTabNavigator = () => (
     <Tab.Screen name="Search" component={SearchStack} />
     <Tab.Screen name="Reels" component={ReelsScreen} />
     <Tab.Screen name="Create" component={CreatePostScreen} />
+    <Tab.Screen name="Notifications" component={NotificationsScreen} />
     <Tab.Screen name="Profile" component={ProfileStack} />
   </Tab.Navigator>
 );

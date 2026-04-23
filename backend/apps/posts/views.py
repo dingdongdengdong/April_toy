@@ -110,7 +110,10 @@ class LikeToggleView(APIView):
                 post.author,
                 title=f"{request.user.username} liked your post",
                 body=post.caption[:60] or "Check it out!",
-                data={"type": "like", "post_id": str(post.id)}
+                data={"type": "like", "post_id": str(post.id)},
+                notification_type='like',
+                sender=request.user,
+                post=post,
             )
         return Response({"detail": "Liked.", "likes_count": post.likes_count, "is_liked": True}, status=status.HTTP_201_CREATED)
 
@@ -131,7 +134,10 @@ class CommentListCreateView(generics.ListCreateAPIView):
                 post.author,
                 title=f"{self.request.user.username} commented on your post",
                 body=comment.text[:60],
-                data={"type": "comment", "post_id": str(post.id)}
+                data={"type": "comment", "post_id": str(post.id)},
+                notification_type='comment',
+                sender=self.request.user,
+                post=post,
             )
 
 

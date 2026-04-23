@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   FlatList,
   StyleSheet,
   ActivityIndicator,
@@ -33,7 +34,11 @@ const StoriesBar = ({ stories, navigation, currentUser }) => {
         onPress={() => navigation.navigate('CreateStory')}
       >
         <View style={[styles.storyRing, { borderColor: '#dbdbdb' }]}>
-          <View style={styles.storyAvatar} />
+          {currentUser?.profile?.profile_image ? (
+            <Image source={{ uri: currentUser.profile.profile_image }} style={styles.storyAvatar} />
+          ) : (
+            <View style={styles.storyAvatarPlaceholder} />
+          )}
         </View>
         <Text style={styles.storyName}>Your story</Text>
       </TouchableOpacity>
@@ -45,7 +50,11 @@ const StoriesBar = ({ stories, navigation, currentUser }) => {
           onPress={() => navigation.navigate('StoryViewer', { stories: groupedArray, initialIndex: index })}
         >
           <View style={styles.storyRing}>
-            <View style={styles.storyAvatar} />
+            {group.user?.profile?.profile_image ? (
+              <Image source={{ uri: group.user.profile.profile_image }} style={styles.storyAvatar} />
+            ) : (
+              <View style={styles.storyAvatarPlaceholder} />
+            )}
           </View>
           <Text style={styles.storyName} numberOfLines={1}>
             {group.user.username}
@@ -176,6 +185,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   storyAvatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+  },
+  storyAvatarPlaceholder: {
     width: 58,
     height: 58,
     borderRadius: 29,

@@ -62,7 +62,9 @@ class FollowToggleView(APIView):
             target,
             title=f"{request.user.username} started following you",
             body="Check out their profile!",
-            data={"type": "follow", "user_id": str(request.user.id)}
+            data={"type": "follow", "user_id": str(request.user.id)},
+            notification_type='follow',
+            sender=request.user,
         )
         return Response({"detail": "Followed."}, status=status.HTTP_201_CREATED)
 

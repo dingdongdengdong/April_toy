@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   FlatList,
   TouchableOpacity,
@@ -49,9 +50,15 @@ const CommentsScreen = ({ route, navigation }) => {
     }
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }) => {
+    const avatarUrl = item.user?.profile?.profile_image;
+    return (
     <View style={styles.commentRow}>
-      <View style={styles.avatar} />
+      {avatarUrl ? (
+        <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+      ) : (
+        <View style={styles.avatarPlaceholder} />
+      )}
       <View style={styles.commentBody}>
         <Text style={styles.commentText}>
           <Text style={styles.username}>{item.user?.username} </Text>
@@ -60,7 +67,7 @@ const CommentsScreen = ({ route, navigation }) => {
         <Text style={styles.time}>{new Date(item.created_at).toLocaleDateString()}</Text>
       </View>
     </View>
-  );
+  );};
 
   return (
     <KeyboardAvoidingView
@@ -134,6 +141,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+  },
+  avatarPlaceholder: {
     width: 36,
     height: 36,
     borderRadius: 18,

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,12 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TapGestureHandler, State } from 'react-native-gesture-handler';
 import apiClient from '../api/client';
+import SafeVideo from './SafeVideo';
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +21,10 @@ const PostCard = React.memo(({ post, navigation, onUpdate }) => {
   const [isSaved, setIsSaved] = useState(post.is_saved);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [scaleAnim] = useState(new Animated.Value(0));
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const videoRef = useRef(null);
 
   const handleLikeToggle = useCallback(async () => {
     const nextLiked = !isLiked;
@@ -30,7 +36,6 @@ const PostCard = React.memo(({ post, navigation, onUpdate }) => {
       setIsLiked(res.data.is_liked);
       if (onUpdate) onUpdate({ ...post, is_liked: res.data.is_liked, likes_count: res.data.likes_count });
     } catch (e) {
-      // rollback on error
       setIsLiked(!nextLiked);
       setLikesCount((prev) => (!nextLiked ? prev + 1 : prev - 1));
     }
@@ -68,29 +73,99 @@ const PostCard = React.memo(({ post, navigation, onUpdate }) => {
     }
   }, [isSaved, post.id, onUpdate]);
 
+  const onScroll = (event) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / width);
+    setCurrentImageIndex(index);
+  };
+
+  const avatarUrl = post.author?.profile?.profile_image;
+  const hasMultipleImages = post.images && post.images.length > 1;
+
+  const renderMedia = () => {
+    if (post.video_url) {
+      return (
+        <View style={styles.mediaContainer}>
+          <SafeVideo
+            ref={videoRef}
+            style={styles.postImage}
+            source={{ uri: post.video_url }}
+            resizeMode="cover"
+            isLooping
+            shouldPlay={!isPaused}
+            isMuted={isMuted}
+            useNativeControls={false}
+          />
+          <TouchableOpacity
+            style={styles.muteButton}
+            onPress={() => setIsMuted((m) => !m)}
+          >
+            <Ionicons name={isMuted ? 'volume-mute' : 'volume-high'} size={22} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.playPauseButton}
+            onPress={() => setIsPaused((p) => !p)}
+          >
+            {isPaused && <Ionicons name="play-circle" size={48} color="#fff" />}
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    if (post.images?.length > 0) {
+      if (post.images.length === 1) {
+        return (
+          <Image source={{ uri: post.images[0].image }} style={styles.postImage} resizeMode="cover" />
+        );
+      }
+
+      return (
+        <View>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+          >
+            {post.images.map((img) => (
+              <Image key={img.id} source={{ uri: img.image }} style={styles.postImage} resizeMode="cover" />
+            ))}
+          </ScrollView>
+          <View style={styles.dotsContainer}>
+            {post.images.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  index === currentImageIndex && styles.activeDot,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+      );
+    }
+
+    return <View style={styles.postImage} />;
+  };
+
   return (
     <View style={styles.card}>
       <TouchableOpacity style={styles.header} onPress={goToProfile}>
-        <View style={styles.avatar} />
+        {avatarUrl ? (
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Ionicons name="person" size={16} color="#999" />
+          </View>
+        )}
         <Text style={styles.username}>{post.author?.username}</Text>
       </TouchableOpacity>
 
       <TapGestureHandler onHandlerStateChange={onDoubleTap} numberOfTaps={2}>
         <View>
-          {post.video_url ? (
-            <View style={styles.postImage}>
-              {post.images?.[0]?.image ? (
-                <Image source={{ uri: post.images[0].image }} style={styles.postImage} resizeMode="cover" />
-              ) : (
-                <View style={[styles.postImage, { backgroundColor: '#000' }]} />
-              )}
-              <View style={styles.videoIndicator}>
-                <Ionicons name="play-circle" size={48} color="#fff" />
-              </View>
-            </View>
-          ) : post.images?.length > 0 && (
-            <Image source={{ uri: post.images[0].image }} style={styles.postImage} resizeMode="cover" />
-          )}
+          {renderMedia()}
           <Animated.View
             style={[
               styles.heartOverlay,
@@ -118,6 +193,12 @@ const PostCard = React.memo(({ post, navigation, onUpdate }) => {
           <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={26} color="#000" />
         </TouchableOpacity>
       </View>
+
+      {hasMultipleImages && (
+        <Text style={styles.pageIndicator}>
+          {currentImageIndex + 1} / {post.images.length}
+        </Text>
+      )}
 
       <Text style={styles.likes}>{likesCount} likes</Text>
 
@@ -153,24 +234,64 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
+    marginRight: 10,
+  },
+  avatarPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#ddd',
     marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   username: {
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  mediaContainer: {
+    position: 'relative',
   },
   postImage: {
     width,
     height: width,
     backgroundColor: '#eee',
   },
-  videoIndicator: {
+  dotsContainer: {
     position: 'absolute',
-    top: width / 2 - 24,
-    left: width / 2 - 24,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderRadius: 24,
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    marginHorizontal: 3,
+  },
+  activeDot: {
+    backgroundColor: '#0095f6',
+  },
+  muteButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 16,
+    padding: 6,
+  },
+  playPauseButton: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   heartOverlay: {
     position: 'absolute',
@@ -186,6 +307,12 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     marginRight: 14,
+  },
+  pageIndicator: {
+    paddingHorizontal: 10,
+    marginTop: 4,
+    fontSize: 12,
+    color: '#666',
   },
   likes: {
     fontWeight: '600',

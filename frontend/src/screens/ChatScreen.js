@@ -14,8 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../api/client';
 import { useAuth } from '../context/AuthContext';
-
-const API_URL = 'http://10.34.83.169:8000';
+import { WS_URL } from '../config/api';
 
 const ChatScreen = ({ route, navigation }) => {
   const { userId, username } = route.params;
@@ -47,7 +46,7 @@ const ChatScreen = ({ route, navigation }) => {
       const token = await AsyncStorage.getItem('accessToken');
       if (!token) return;
 
-      const socket = new WebSocket(`ws://${API_URL.replace('http://', '')}/ws/chat/?token=${token}`);
+      const socket = new WebSocket(`${WS_URL}/ws/chat/?token=${token}`);
 
       socket.onopen = () => {
         setConnected(true);

@@ -65,7 +65,13 @@ const ProfileScreen = ({ navigation }) => {
   const ListHeader = () => (
     <View style={styles.header}>
       <View style={styles.topRow}>
-        <View style={styles.bigAvatar} />
+        {profile.profile?.profile_image ? (
+          <Image source={{ uri: profile.profile.profile_image }} style={styles.bigAvatar} />
+        ) : (
+          <View style={styles.bigAvatarPlaceholder}>
+            <Ionicons name="person" size={32} color="#999" />
+          </View>
+        )}
         <View style={styles.statsRow}>
           <View style={styles.stat}>
             <Text style={styles.statNumber}>{posts.length}</Text>
@@ -142,8 +148,16 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    marginRight: 20,
+  },
+  bigAvatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: '#ddd',
     marginRight: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   statsRow: {
     flex: 1,

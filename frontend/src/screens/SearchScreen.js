@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   FlatList,
   TouchableOpacity,
@@ -47,18 +48,25 @@ const SearchScreen = ({ navigation }) => {
       .catch((e) => console.log('Trending error:', e));
   }, []);
 
-  const renderUserItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.row}
-      onPress={() => navigation.navigate('UserProfile', { username: item.username })}
-    >
-      <View style={styles.avatar} />
-      <View>
-        <Text style={styles.username}>{item.username}</Text>
-        <Text style={styles.name}>{item.email}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderUserItem = ({ item }) => {
+    const avatarUrl = item.profile?.profile_image;
+    return (
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => navigation.navigate('UserProfile', { username: item.username })}
+      >
+        {avatarUrl ? (
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder} />
+        )}
+        <View>
+          <Text style={styles.username}>{item.username}</Text>
+          <Text style={styles.name}>{item.email}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderTrending = () => (
     <View style={styles.trendingSection}>
@@ -171,6 +179,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 12,
+  },
+  avatarPlaceholder: {
     width: 44,
     height: 44,
     borderRadius: 22,

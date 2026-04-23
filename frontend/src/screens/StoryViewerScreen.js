@@ -121,7 +121,11 @@ const StoryViewerScreen = ({ route, navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          <View style={styles.avatar} />
+          {currentUser.user?.profile?.profile_image ? (
+            <Image source={{ uri: currentUser.user.profile.profile_image }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder} />
+          )}
           <Text style={styles.username}>{currentUser.user.username}</Text>
           <Text style={styles.time}>
             {new Date(currentStory.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -184,6 +188,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  avatarPlaceholder: {
     width: 32,
     height: 32,
     borderRadius: 16,
