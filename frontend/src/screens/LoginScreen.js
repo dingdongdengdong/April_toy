@@ -11,7 +11,16 @@ const LoginScreen = ({ navigation }) => {
     try {
       await login(email, password);
     } catch (error) {
-      Alert.alert('Login Failed', error.response?.data?.detail || 'Please try again');
+      let message = 'Please try again';
+      if (error.response?.data?.detail) {
+        message = error.response.data.detail;
+      } else if (error.response?.data) {
+        message = JSON.stringify(error.response.data);
+      } else if (error.message) {
+        message = error.message;
+      }
+      console.log('Login error:', error.message, error.response?.data);
+      Alert.alert('Login Failed', message);
     }
   };
 

@@ -13,9 +13,13 @@ const RegisterScreen = ({ navigation }) => {
     try {
       await register(email, username, password, passwordConfirm);
     } catch (error) {
-      const message = error.response?.data
-        ? JSON.stringify(error.response.data)
-        : 'Registration failed. Please try again.';
+      let message = 'Registration failed. Please try again.';
+      if (error.response?.data) {
+        message = JSON.stringify(error.response.data);
+      } else if (error.message) {
+        message = error.message;
+      }
+      console.log('Register error:', error.message, error.response?.data);
       Alert.alert('Register Failed', message);
     }
   };
