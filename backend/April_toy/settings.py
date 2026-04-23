@@ -80,12 +80,43 @@ TEMPLATES = [
 WSGI_APPLICATION = 'April_toy.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Priority: 1) DATABASE_URL env var, 2) Local PostgreSQL, 3) SQLite fallback
+import dj_database_url
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
+else:
+    # Try local PostgreSQL first, fallback to SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DJANGO_DB_NAME', 'instagram'),
+            'USER': os.getenv('DJANGO_DB_USER', 'dong'),
+            'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', ''),
+            'HOST': os.getenv('DJANGO_DB_HOST', 'localhost'),
+            'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
+        }
     }
-}
+    # Test PostgreSQL connection; fallback to SQLite if unavailable
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            dbname=DATABASES['default']['NAME'],
+            user=DATABASES['default']['USER'],
+            password=DATABASES['default']['PASSWORD'],
+            host=DATABASES['default']['HOST'],
+            port=DATABASES['default']['PORT'],
+            connect_timeout=2,
+        )
+        conn.close()
+    except Exception:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
